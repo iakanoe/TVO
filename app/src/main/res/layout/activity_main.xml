@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coord"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.monitoreomayorista.superapp.Main">
+
+    <Button
+        android:id="@+id/loginBtn"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="top|end"
+        android:background="@android:color/transparent"
+        android:elevation="8dp"
+        android:foreground="@drawable/ic_account_box_black_24dp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:gravity="center_vertical">
+
+        <RelativeLayout
+            android:id="@+id/btnAmbulancia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="10dp"
+            android:clickable="true"
+            android:contextClickable="false"
+            android:foregroundGravity="left|center_vertical">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/iwx1"
+                android:background="#c01a24"
+                android:clickable="false"
+                android:elevation="4dp"
+                android:text="Ambulancia"
+                android:textColor="#FFFFFF"
+                android:textSize="22dp" />
+
+            <ImageView
+                android:id="@+id/iwx1"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:elevation="4dp"
+                android:foreground="@drawable/ambulance" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/btnBomberos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/btnAmbulancia"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="8dp"
+            android:clickable="true"
+            android:contextClickable="false"
+            android:foregroundGravity="left|center_vertical">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/iwx2"
+                android:background="#d68837"
+                android:clickable="false"
+                android:elevation="4dp"
+                android:text="Bomberos"
+                android:textColor="#FFFFFF"
+                android:textSize="22dp" />
+
+            <ImageView
+                android:id="@+id/iwx2"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:elevation="4dp"
+                android:foreground="@drawable/fire" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/btnPanico"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/btnBomberos"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="8dp"
+            android:clickable="true"
+            android:contextClickable="false"
+            android:foregroundGravity="left|center_vertical">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/iwx3"
+                android:background="#3e579d"
+                android:clickable="false"
+                android:elevation="4dp"
+                android:text="Pánico"
+                android:textColor="#FFFFFF"
+                android:textSize="22dp" />
+
+            <ImageView
+                android:id="@+id/iwx3"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:elevation="4dp"
+                android:foreground="@drawable/policeman" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@android:color/holo_orange_dark"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:id="@+id/statusTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@android:color/black"
+            android:textSize="18dp" />
+
+    </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>
