@@ -2,6 +2,7 @@ package com.monitoreomayorista.superapp;
 
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -13,6 +14,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -30,7 +32,9 @@ public class Main extends AppCompatActivity {
     enum Evento {
         MEDICA (100),
         FUEGO (110),
-        PANICO (120);
+        PANICO (120),
+        TVO (886),  // Añadido por //
+        TEST (603); //  TVOENTER   //
 
         int code;
 
@@ -42,6 +46,7 @@ public class Main extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         tinyDB = this.getPreferences(Context.MODE_PRIVATE);
         (findViewById(R.id.btnAmbulancia)).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { evento(Evento.MEDICA); }});
@@ -89,31 +94,33 @@ public class Main extends AppCompatActivity {
     }
 
     void evento(Evento evt) {
-        UDPTask udpTask = null;
-        try {
-            udpTask = new UDPTask("ram.dyndns.ws", 6341);
-        } catch (UnknownHostException e) {
-            Log.println(Log.ASSERT, "UnknownHostException", e.toString());
-        } catch (SocketException e) {
-            Log.println(Log.ASSERT, "SocketException", e.toString());
-        }
+        if(!numAbonado.equals("")){
+            UDPTask udpTask = null;
+            try {
+                udpTask = new UDPTask("ram.dyndns.ws", 6341);
+            } catch (UnknownHostException e) {
+                Log.println(Log.ASSERT, "UnknownHostException", e.toString());
+            } catch (SocketException e) {
+                Log.println(Log.ASSERT, "SocketException", e.toString());
+            }
 
-        Date d = Calendar.getInstance().getTime();
-        String msg =
-            "$B," +
-            numAbonado +
-            "," +
-            (new SimpleDateFormat("ss")).format(d) +
-            "," +
-            (new SimpleDateFormat("HH:mm")).format(d) +
-            ",01," +
-            numAbonado +
-            "181" +
-            String.format("%03d", evt.code) +
-            "0000,8,0,0," +
-            claveAbonado +
-            ",10,4_4.3,$E";
-        udpTask.execute(msg);
-        Snackbar.make(findViewById(R.id.coord), "Señal enviada", Snackbar.LENGTH_SHORT).show();
+            Date d = Calendar.getInstance().getTime();
+            String msg =
+                "$B," +
+                numAbonado +
+                "," +
+                (new SimpleDateFormat("ss")).format(d) +
+                "," +
+                (new SimpleDateFormat("HH:mm")).format(d) +
+                ",01," +
+                numAbonado +
+                "181" +
+                String.format("%03d", evt.code) +
+                "0000,8,0,0," +
+                claveAbonado +
+                ",10,4_4.3,$E";
+            udpTask.execute(msg);
+            Snackbar.make(findViewById(R.id.coord), "Señal enviada", Snackbar.LENGTH_SHORT).show();
+        } else Snackbar.make(findViewById(R.id.coord), "No está conectado", Snackbar.LENGTH_SHORT).show();
     }
 }
