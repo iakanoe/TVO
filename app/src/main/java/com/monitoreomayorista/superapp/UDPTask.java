@@ -7,31 +7,45 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-class UDPTask extends AsyncTask<String, Void, Void> {
-    private InetAddress addr;
+class UDPTask extends AsyncTask<Void, Void, Boolean> {
     private String ip;
     private int port;
-    private DatagramSocket s;
+    private String msg;
+    //private DatagramSocket s;
+    private OnTaskCompletedListener onTaskCompletedListener;
 
-    @Override protected Void doInBackground(String... params) {
-        String msg = params[0];
+    public void setOnTaskCompletedListener(OnTaskCompletedListener onTaskCompletedListener){
+        this.onTaskCompletedListener = onTaskCompletedListener;
+    }
+
+    public void sendUDP(String packet){
+        this.msg = packet;
+        execute();
+    }
+
+    @Override protected Boolean doInBackground(Void... params) {
         byte[] message = msg.getBytes();
         int msg_length = msg.length();
         try {
-            addr = InetAddress.getByName(ip);
-            s.send(new DatagramPacket(message, msg_length, addr, port));
+            (new DatagramSocket()).send(new DatagramPacket(message, msg_length, InetAddress.getByName(ip), port));
         } catch (IOException e) {
             Log.println(Log.ASSERT, "IOException", e.toString());
+            return false;
         }
-        return null;
+        return true;
     }
 
-    UDPTask(String ip, int port) throws UnknownHostException, SocketException {
+    @Override protected void onPostExecute(Boolean result) {
+        super.onPostExecute(result);
+        onTaskCompletedListener.onTaskCompleted(result);
+    }
+
+    public UDPTask(String ip, int port) {
         this.ip = ip;
         this.port = port;
-        s = new DatagramSocket();
     }
 }
