@@ -2,6 +2,7 @@ package com.monitoreomayorista.superapp;
 
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -13,6 +14,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -22,22 +24,30 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
+enum Evento {
+    MEDICA (100),
+    FUEGO (110),
+    PANICO (120),
+    TVO (886),  // Añadido por //
+    TEST (603); //  TVOENTER   //
+
+    int code;
+
+    Evento(int code){
+        this.code = code;
+    }
+};
 
 public class Main extends AppCompatActivity {
     SharedPreferences tinyDB;
     String numAbonado = "0031";
     String claveAbonado = "1234";
-    enum Evento {
-        MEDICA (100),
-        FUEGO (110),
-        PANICO (120);
-
-        int code;
-
-        Evento(int code){
-            this.code = code;
-        }
-    };
+    int minutos;
+    int segundos;
+    Timer timer;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +59,8 @@ public class Main extends AppCompatActivity {
             @Override public void onClick(View v) { evento(Evento.FUEGO); }});
         (findViewById(R.id.btnPanico)).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { evento(Evento.PANICO); }});
+        (findViewById(R.id.btnTVO)).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { evento(Evento.TVO); }});
         (findViewById(R.id.loginBtn)).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { crearLoginDialog(); }});
         refrescar();
@@ -73,9 +85,7 @@ public class Main extends AppCompatActivity {
 
     void procesarUserPass(String user, String pass){
         SharedPreferences.Editor editor = tinyDB.edit();
-        editor.putString("num", user);
-        editor.putString("key", pass);
-        editor.commit();
+        editor.putString("num", user).putString("key", pass).commit();
         editor.apply();
         refrescar();
     }
@@ -88,32 +98,73 @@ public class Main extends AppCompatActivity {
         else ((TextView) findViewById(R.id.statusTxt)).setText("Conectado con cuenta " + numAbonado);
     }
 
-    void evento(Evento evt) {
-        UDPTask udpTask = null;
-        try {
-            udpTask = new UDPTask("ram.dyndns.ws", 6341);
-        } catch (UnknownHostException e) {
-            Log.println(Log.ASSERT, "UnknownHostException", e.toString());
-        } catch (SocketException e) {
-            Log.println(Log.ASSERT, "SocketException", e.toString());
-        }
+    void timer(){
+        if(segundos == 0 && minutos == 0){
+            timer.cancel();
+            timer.schedule(new TimerTask() {
+                @Override public void run() { runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        (findViewById(R.id.btnTVO)).setClickable(false);
+                        (findViewById(R.id.bwx4)).setVisibility(View.VISIBLE);
+                        (findViewById(R.id.tvo1txt)).setVisibility(View.GONE);
+                        (findViewById(R.id.tvo2txt)).setVisibility(View.GONE);
+                    }
+                });}}, 1000);
+        } else if(segundos == 0){
+            segundos = 59;
+            minutos--;
+        } else segundos--;
+        ((TextView) findViewById(R.id.tvo2txt)).setText(String.valueOf(minutos) + ':' + String.format("%02d", segundos));    }
 
-        Date d = Calendar.getInstance().getTime();
-        String msg =
-            "$B," +
-            numAbonado +
-            "," +
-            (new SimpleDateFormat("ss")).format(d) +
-            "," +
-            (new SimpleDateFormat("HH:mm")).format(d) +
-            ",01," +
-            numAbonado +
-            "181" +
-            String.format("%03d", evt.code) +
-            "0000,8,0,0," +
-            claveAbonado +
-            ",10,4_4.3,$E";
-        udpTask.execute(msg);
+    void callback(Evento evt, boolean result){
+        if(!result){
+            Snackbar.make(findViewById(R.id.coord), "La señal no se pudo enviar", Snackbar.LENGTH_SHORT).show();
+            return;
+        } else if(evt == Evento.TEST){
+            Snackbar.make(findViewById(R.id.coord), "La señal de prueba ha sido recibida", Snackbar.LENGTH_SHORT).show();
+            return;
+        } else if(evt == Evento.TVO){
+            (findViewById(R.id.btnTVO)).setClickable(false);
+            (findViewById(R.id.bwx4)).setVisibility(View.GONE);
+            (findViewById(R.id.tvo1txt)).setVisibility(View.VISIBLE);
+            (findViewById(R.id.tvo2txt)).setVisibility(View.VISIBLE);
+            minutos = 5;
+            segundos = 0;
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override public void run() { runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {timer();
+                    }
+                });}}, 1000, 1000);
+            ((TextView) findViewById(R.id.tvo2txt)).setText(String.valueOf(minutos) + ':' + String.format("%02d", segundos));
+        }
         Snackbar.make(findViewById(R.id.coord), "Señal enviada", Snackbar.LENGTH_SHORT).show();
+    }
+
+    void evento(final Evento evt) {
+        if(!numAbonado.equals("")){
+            UDPTask udpTask = new UDPTask("ram.dyndns.ws", 6341);
+            Date d = Calendar.getInstance().getTime();
+            String msg =
+                "$B," +
+                numAbonado +
+                "," +
+                (new SimpleDateFormat("ss")).format(d) +
+                "," +
+                (new SimpleDateFormat("HH:mm")).format(d) +
+                ",01," +
+                numAbonado +
+                "181" +
+                String.format("%03d", evt.code) +
+                "0000,8,0,0," +
+                claveAbonado +
+                ",10,4_4.3,$E";
+
+            udpTask.setOnTaskCompletedListener(new OnTaskCompletedListener() {
+                @Override public void onTaskCompleted(boolean result) {callback(evt, result);
+                }});
+            udpTask.sendUDP(msg);
+        } else Snackbar.make(findViewById(R.id.coord), "No está conectado", Snackbar.LENGTH_SHORT).show();
     }
 }
