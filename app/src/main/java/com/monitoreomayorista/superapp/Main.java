@@ -3,6 +3,7 @@ package com.monitoreomayorista.superapp;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -13,6 +14,7 @@ import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -31,11 +33,9 @@ enum Evento {
     MEDICA (100),
     FUEGO (110),
     PANICO (120),
-    TVO (886),  // Añadido por //
-    TEST (603); //  TVOENTER   //
-
+    TVO (886),
+    TEST (603);
     int code;
-
     Evento(int code){
         this.code = code;
     }
@@ -43,27 +43,112 @@ enum Evento {
 
 public class Main extends AppCompatActivity {
     SharedPreferences tinyDB;
-    String numAbonado = "0031";
-    String claveAbonado = "1234";
+    String numAbonado;
+    String claveAbonado;
+    String smsNum;
     int minutos;
     int segundos;
     Timer timer;
+    Handler handler = new Handler();
+
+    class EventRunnable implements Runnable {
+        private Evento evt;
+        EventRunnable(Evento e) { evt = e; }
+        public void run() {runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    evento(evt);
+                }
+            });}
+    }
+    EventRunnable runMedica = new EventRunnable(Evento.MEDICA);
+    EventRunnable runFuego = new EventRunnable(Evento.FUEGO);
+    EventRunnable runPanico = new EventRunnable(Evento.PANICO);
+    EventRunnable runTVO = new EventRunnable(Evento.TVO);
+    EventRunnable runTest = new EventRunnable(Evento.TEST);
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tinyDB = this.getPreferences(Context.MODE_PRIVATE);
-        (findViewById(R.id.btnAmbulancia)).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { evento(Evento.MEDICA); }});
-        (findViewById(R.id.btnBomberos)).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { evento(Evento.FUEGO); }});
-        (findViewById(R.id.btnPanico)).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { evento(Evento.PANICO); }});
-        (findViewById(R.id.btnTVO)).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { evento(Evento.TVO); }});
-        (findViewById(R.id.loginBtn)).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { crearLoginDialog(); }});
+        initializeUi();
         refrescar();
+    }
+
+    void initializeUi(){
+        (findViewById(R.id.btnAmbulancia)).setOnTouchListener(new View.OnTouchListener() {
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        handler.postDelayed(runMedica, 1000);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        handler.removeCallbacks(runMedica);
+                }
+                return false;
+            }
+        });
+        (findViewById(R.id.btnBomberos)).setOnTouchListener(new View.OnTouchListener() {
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        handler.postDelayed(runFuego, 1000);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        handler.removeCallbacks(runFuego);
+                }
+                return false;
+            }
+        });
+        (findViewById(R.id.btnPanico)).setOnTouchListener(new View.OnTouchListener() {
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        handler.postDelayed(runPanico, 1000);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        handler.removeCallbacks(runPanico);
+                }
+                return false;
+            }
+        });
+        (findViewById(R.id.btnTVO)).setOnTouchListener(new View.OnTouchListener() {
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        handler.postDelayed(runTVO, 1000);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        handler.removeCallbacks(runTVO);
+                }
+                return false;
+            }
+        });
+        /*(findViewById(R.id.btnTest)).setOnTouchListener(new View.OnTouchListener() {
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        handler.postDelayed(runTest, 1000);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        handler.removeCallbacks(runTest);
+                }
+                return false;
+            }
+        });*/
+    }
+
+    void getNumber(){
+        String num = "";
+        //getear number de web
+        if(num.equals("")){
+            num = tinyDB.getString("smsnum", "");
+        } else {
+            SharedPreferences.Editor editor = tinyDB.edit().putString("smsnum", num);
+            editor.commit();
+            editor.apply();
+        }
+        smsNum = num;
     }
 
     void crearLoginDialog(){
@@ -84,8 +169,8 @@ public class Main extends AppCompatActivity {
     }
 
     void procesarUserPass(String user, String pass){
-        SharedPreferences.Editor editor = tinyDB.edit();
-        editor.putString("num", user).putString("key", pass).commit();
+        SharedPreferences.Editor editor = tinyDB.edit().putString("num", user).putString("key", pass);
+        editor.commit();
         editor.apply();
         refrescar();
     }
@@ -114,16 +199,17 @@ public class Main extends AppCompatActivity {
             segundos = 59;
             minutos--;
         } else segundos--;
-        ((TextView) findViewById(R.id.tvo2txt)).setText(String.valueOf(minutos) + ':' + String.format("%02d", segundos));    }
+        ((TextView) findViewById(R.id.tvo2txt)).setText(String.valueOf(minutos) + ':' + String.format("%02d", segundos));
+    }
 
-    void callback(Evento evt, boolean result){
-        if(!result){
+    void callback(Evento evt, boolean result) {
+        if (!result) {
             Snackbar.make(findViewById(R.id.coord), "La señal no se pudo enviar", Snackbar.LENGTH_SHORT).show();
             return;
-        } else if(evt == Evento.TEST){
+        } else if (evt == Evento.TEST) {
             Snackbar.make(findViewById(R.id.coord), "La señal de prueba ha sido recibida", Snackbar.LENGTH_SHORT).show();
             return;
-        } else if(evt == Evento.TVO){
+        } else if (evt == Evento.TVO) {
             (findViewById(R.id.btnTVO)).setClickable(false);
             (findViewById(R.id.bwx4)).setVisibility(View.GONE);
             (findViewById(R.id.tvo1txt)).setVisibility(View.VISIBLE);
@@ -132,21 +218,24 @@ public class Main extends AppCompatActivity {
             segundos = 0;
             timer = new Timer();
             timer.schedule(new TimerTask() {
-                @Override public void run() { runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {timer();
-                    }
-                });}}, 1000, 1000);
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            timer();
+                        }
+                    });
+                }
+            }, 1000, 1000);
             ((TextView) findViewById(R.id.tvo2txt)).setText(String.valueOf(minutos) + ':' + String.format("%02d", segundos));
         }
         Snackbar.make(findViewById(R.id.coord), "Señal enviada", Snackbar.LENGTH_SHORT).show();
     }
 
-    void evento(final Evento evt) {
-        if(!numAbonado.equals("")){
-            UDPTask udpTask = new UDPTask("ram.dyndns.ws", 6341);
-            Date d = Calendar.getInstance().getTime();
-            String msg =
+    String makeMsg(Evento evt){
+        Date d = Calendar.getInstance().getTime();
+        String msg =
                 "$B," +
                 numAbonado +
                 "," +
@@ -160,11 +249,16 @@ public class Main extends AppCompatActivity {
                 "0000,8,0,0," +
                 claveAbonado +
                 ",10,4_4.3,$E";
+        return msg;
+    }
 
+    void evento(final Evento evt) {
+        if(!numAbonado.equals("")){
+            UDPTask udpTask = new UDPTask("ram.dyndns.ws", 6341);
             udpTask.setOnTaskCompletedListener(new OnTaskCompletedListener() {
                 @Override public void onTaskCompleted(boolean result) {callback(evt, result);
                 }});
-            udpTask.sendUDP(msg);
+            udpTask.sendUDP(makeMsg(evt));
         } else Snackbar.make(findViewById(R.id.coord), "No está conectado", Snackbar.LENGTH_SHORT).show();
     }
 }

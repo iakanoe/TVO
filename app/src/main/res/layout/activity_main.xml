@@ -40,7 +40,7 @@
                 android:layout_height="100dp"
                 android:layout_alignParentTop="true"
                 android:layout_toEndOf="@+id/iwx1"
-                android:background="#c01a24"
+                android:background="#388E3C"
                 android:clickable="false"
                 android:elevation="4dp"
                 android:text="Ambulancia"
@@ -54,7 +54,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:elevation="4dp"
-                android:foreground="@drawable/ambulance" />
+                android:src="@drawable/ambulance" />
 
         </RelativeLayout>
 
@@ -75,7 +75,7 @@
                 android:layout_height="100dp"
                 android:layout_alignParentTop="true"
                 android:layout_toEndOf="@+id/iwx2"
-                android:background="#d68837"
+                android:background="#D32F2F"
                 android:clickable="false"
                 android:elevation="4dp"
                 android:text="Bomberos"
@@ -89,7 +89,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:elevation="4dp"
-                android:foreground="@drawable/fire" />
+                android:src="@drawable/fire" />
 
         </RelativeLayout>
 
@@ -110,7 +110,7 @@
                 android:layout_height="100dp"
                 android:layout_alignParentTop="true"
                 android:layout_toEndOf="@+id/iwx3"
-                android:background="#3e579d"
+                android:background="#1976D2"
                 android:clickable="false"
                 android:elevation="4dp"
                 android:text="Pánico"
@@ -124,7 +124,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:elevation="4dp"
-                android:foreground="@drawable/policeman" />
+                android:src="@drawable/policeman" />
 
         </RelativeLayout>
 
@@ -187,7 +187,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:elevation="4dp"
-                android:foreground="@drawable/tvo" />
+                android:src="@drawable/tvo" />
 
         </RelativeLayout>
 
