@@ -3,7 +3,9 @@ package com.monitoreomayorista.superapp;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -50,6 +52,7 @@ public class Main extends AppCompatActivity {
     int segundos;
     Timer timer;
     Handler handler = new Handler();
+    Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
     class EventRunnable implements Runnable {
         private Evento evt;
@@ -203,6 +206,7 @@ public class Main extends AppCompatActivity {
     }
 
     void callback(Evento evt, boolean result) {
+        vibrator.vibrate(500);
         if (!result) {
             Snackbar.make(findViewById(R.id.coord), "La señal no se pudo enviar", Snackbar.LENGTH_SHORT).show();
             return;
@@ -253,12 +257,11 @@ public class Main extends AppCompatActivity {
     }
 
     void evento(final Evento evt) {
-        if(!numAbonado.equals("")){
-            UDPTask udpTask = new UDPTask("ram.dyndns.ws", 6341);
-            udpTask.setOnTaskCompletedListener(new OnTaskCompletedListener() {
-                @Override public void onTaskCompleted(boolean result) {callback(evt, result);
-                }});
-            udpTask.sendUDP(makeMsg(evt));
-        } else Snackbar.make(findViewById(R.id.coord), "No está conectado", Snackbar.LENGTH_SHORT).show();
+        if(numAbonado.equals("")){ Snackbar.make(findViewById(R.id.coord), "No está conectado", Snackbar.LENGTH_SHORT).show(); return;}
+        UDPTask udpTask = new UDPTask("ram.dyndns.ws", 6341);
+        udpTask.setOnTaskCompletedListener(new OnTaskCompletedListener() {
+            @Override public void onTaskCompleted(boolean result) {callback(evt, result);
+            }});
+        udpTask.sendUDP(makeMsg(evt));
     }
 }
