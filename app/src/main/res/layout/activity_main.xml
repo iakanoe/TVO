@@ -16,7 +16,6 @@
         android:layout_gravity="top|end"
         android:background="@android:color/transparent"
         android:elevation="8dp"
-        android:padding="0dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_account_box_black_24dp" />
 
@@ -194,6 +193,17 @@
         </RelativeLayout>
 
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="88dp"
+        android:layout_height="68dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="4dp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerInside"
+        android:src="@drawable/logo_adonay" />
 
     <RelativeLayout
         android:layout_width="match_parent"
