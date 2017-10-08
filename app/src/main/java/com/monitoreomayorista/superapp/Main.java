@@ -52,7 +52,7 @@ public class Main extends AppCompatActivity {
     int segundos;
     Timer timer;
     Handler handler = new Handler();
-    Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+    Vibrator vibrator;
 
     class EventRunnable implements Runnable {
         private Evento evt;
@@ -74,6 +74,7 @@ public class Main extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tinyDB = this.getPreferences(Context.MODE_PRIVATE);
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         initializeUi();
         refrescar();
     }
