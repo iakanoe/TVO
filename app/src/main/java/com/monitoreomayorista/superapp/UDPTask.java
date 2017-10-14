@@ -15,7 +15,9 @@ class UDPTask extends AsyncTask<Void, Void, Boolean> {
     private String ip;
     private int port;
     private String msg;
-    //private DatagramSocket s;
+    public interface OnTaskCompletedListener {
+        void onTaskCompleted(boolean result);
+    }
     private OnTaskCompletedListener onTaskCompletedListener;
 
     public void setOnTaskCompletedListener(OnTaskCompletedListener onTaskCompletedListener){

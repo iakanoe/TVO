@@ -6,13 +6,18 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.provider.Telephony;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Context;
+import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
+import android.telephony.TelephonyManager;
 import android.text.InputType;
+import android.text.style.TtsSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -52,23 +57,30 @@ public class Main extends AppCompatActivity {
     int segundos;
     Timer timer;
     Handler handler = new Handler();
+    Handler h2 = new Handler();
     Vibrator vibrator;
-
-    class EventRunnable implements Runnable {
-        private Evento evt;
-        EventRunnable(Evento e) { evt = e; }
-        public void run() {runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    evento(evt);
-                }
-            });}
-    }
     EventRunnable runMedica = new EventRunnable(Evento.MEDICA);
     EventRunnable runFuego = new EventRunnable(Evento.FUEGO);
     EventRunnable runPanico = new EventRunnable(Evento.PANICO);
     EventRunnable runTVO = new EventRunnable(Evento.TVO);
     EventRunnable runTest = new EventRunnable(Evento.TEST);
+    SendSMS sendSMS;
+
+    class EventRunnable implements Runnable {
+        private Evento evt;
+        EventRunnable(Evento e) { evt = e; }
+        public void run() {runOnUiThread(new Runnable() {@Override public void run() {
+            evento(evt);
+        }});}
+    }
+
+    class SendSMS implements Runnable {
+        private Evento evt;
+        SendSMS(Evento e) { evt = e; }
+        public void run() {runOnUiThread(new Runnable() {@Override public void run() {
+            SmsManager.getDefault().sendTextMessage(smsNum,null,makeMsg(evt),null,null);
+        }});}
+    }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,16 +155,17 @@ public class Main extends AppCompatActivity {
     }
 
     void getNumber(){
-        String num = "";
-        //getear number de web
-        if(num.equals("")){
-            num = tinyDB.getString("smsnum", "");
-        } else {
-            SharedPreferences.Editor editor = tinyDB.edit().putString("smsnum", num);
-            editor.commit();
-            editor.apply();
-        }
-        smsNum = num;
+        NumGetter g = new NumGetter(new NumGetter.OnNumGot() {@Override public void gotNumber(String n) {
+            if(n == null){
+                n = tinyDB.getString("smsnum", "");
+                return;
+            } else {
+                SharedPreferences.Editor editor = tinyDB.edit().putString("smsnum", n);
+                editor.commit();
+                editor.apply();
+            }
+            smsNum = n;
+        }});
     }
 
     void crearLoginDialog(){
@@ -211,10 +224,13 @@ public class Main extends AppCompatActivity {
         if (!result) {
             Snackbar.make(findViewById(R.id.coord), "La señal no se pudo enviar", Snackbar.LENGTH_SHORT).show();
             return;
-        } else if (evt == Evento.TEST) {
+        }
+        h2.removeCallbacks(sendSMS);
+        if (evt == Evento.TEST) {
             Snackbar.make(findViewById(R.id.coord), "La señal de prueba ha sido recibida", Snackbar.LENGTH_SHORT).show();
             return;
-        } else if (evt == Evento.TVO) {
+        }
+        if (evt == Evento.TVO) {
             (findViewById(R.id.btnTVO)).setClickable(false);
             (findViewById(R.id.bwx4)).setVisibility(View.GONE);
             (findViewById(R.id.tvo1txt)).setVisibility(View.VISIBLE);
@@ -257,12 +273,15 @@ public class Main extends AppCompatActivity {
         return msg;
     }
 
+
     void evento(final Evento evt) {
         if(numAbonado.equals("")){ Snackbar.make(findViewById(R.id.coord), "No está conectado", Snackbar.LENGTH_SHORT).show(); return;}
         UDPTask udpTask = new UDPTask("ram.dyndns.ws", 6341);
-        udpTask.setOnTaskCompletedListener(new OnTaskCompletedListener() {
+        udpTask.setOnTaskCompletedListener(new UDPTask.OnTaskCompletedListener() {
             @Override public void onTaskCompleted(boolean result) {callback(evt, result);
             }});
         udpTask.sendUDP(makeMsg(evt));
+        sendSMS = new SendSMS(evt);
+        h2.postDelayed(sendSMS, 5000);
     }
 }
