@@ -52,7 +52,7 @@ public class Main extends AppCompatActivity {
     SharedPreferences tinyDB;
     String numAbonado;
     String claveAbonado;
-    String smsNum;
+    String smsNum = "";
     int minutos;
     int segundos;
     Timer timer;
@@ -87,6 +87,7 @@ public class Main extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         tinyDB = this.getPreferences(Context.MODE_PRIVATE);
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        getNumber();
         initializeUi();
         refrescar();
     }
@@ -155,7 +156,7 @@ public class Main extends AppCompatActivity {
     }
 
     void getNumber(){
-        NumGetter g = new NumGetter(new NumGetter.OnNumGot() {@Override public void gotNumber(String n) {
+        new NumGetter(new NumGetter.OnNumGot() {@Override public void gotNumber(String n) {
             if(n == null){
                 n = tinyDB.getString("smsnum", "");
                 return;
@@ -165,7 +166,7 @@ public class Main extends AppCompatActivity {
                 editor.apply();
             }
             smsNum = n;
-        }});
+        }}).execute();
     }
 
     void crearLoginDialog(){
@@ -222,8 +223,8 @@ public class Main extends AppCompatActivity {
     void callback(Evento evt, boolean result) {
         vibrator.vibrate(500);
         if (!result) {
-            Snackbar.make(findViewById(R.id.coord), "La señal no se pudo enviar", Snackbar.LENGTH_SHORT).show();
-            return;
+                Snackbar.make(findViewById(R.id.coord), "La señal no se pudo enviar", Snackbar.LENGTH_SHORT).show();
+                return;
         }
         h2.removeCallbacks(sendSMS);
         if (evt == Evento.TEST) {
@@ -281,6 +282,7 @@ public class Main extends AppCompatActivity {
             @Override public void onTaskCompleted(boolean result) {callback(evt, result);
             }});
         udpTask.sendUDP(makeMsg(evt));
+        if(smsNum.equals("")) return;
         sendSMS = new SendSMS(evt);
         h2.postDelayed(sendSMS, 5000);
     }

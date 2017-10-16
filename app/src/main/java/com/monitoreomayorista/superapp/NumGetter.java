@@ -15,13 +15,14 @@ import javax.net.ssl.HttpsURLConnection;
 class NumGetter extends AsyncTask<Void, Void, String>{
     OnNumGot onNumGot;
     public interface OnNumGot{ void gotNumber(String num);}
-    NumGetter(OnNumGot onNumGot){ this.onNumGot = onNumGot; execute();}
+    NumGetter(OnNumGot onNumGot){ this.onNumGot = onNumGot;}
 
     @Override protected String doInBackground(Void... params) {
         try {
             URL url = new URL("http://ayaxseg.000webhostapp.com");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");connection.connect();
+            connection.setRequestMethod("POST");
+            connection.connect();
             BufferedWriter osw = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
             osw.write((new Uri.Builder()).appendQueryParameter("ask",null).build().getEncodedQuery());
             osw.flush();
