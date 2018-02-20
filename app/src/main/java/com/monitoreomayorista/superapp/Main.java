@@ -1,35 +1,23 @@
 package com.monitoreomayorista.superapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.os.Build;
-import android.os.Environment;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.provider.Telephony;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.content.Context;
 import android.telephony.SmsManager;
-import android.telephony.SmsMessage;
-import android.telephony.TelephonyManager;
-import android.text.InputType;
-import android.text.style.TtsSpan;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import java.io.IOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+
+import com.nullwire.trace.ExceptionHandler;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,7 +34,7 @@ enum Evento {
     Evento(int code){
         this.code = code;
     }
-};
+}
 
 public class Main extends AppCompatActivity {
     SharedPreferences tinyDB;
@@ -66,26 +54,11 @@ public class Main extends AppCompatActivity {
     EventRunnable runTest = new EventRunnable(Evento.TEST);
     SendSMS sendSMS;
 
-    class EventRunnable implements Runnable {
-        private Evento evt;
-        EventRunnable(Evento e) { evt = e; }
-        public void run() {runOnUiThread(new Runnable() {@Override public void run() {
-            evento(evt);
-        }});}
-    }
-
-    class SendSMS implements Runnable {
-        private Evento evt;
-        SendSMS(Evento e) { evt = e; }
-        public void run() {runOnUiThread(new Runnable() {@Override public void run() {
-            SmsManager.getDefault().sendTextMessage(smsNum,null,makeMsg(evt),null,null);
-        }});}
-    }
-
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        tinyDB = this.getPreferences(Context.MODE_PRIVATE);
+	    ExceptionHandler.register(this, "http://ayaxseg.000webhostapp.com/exc.php");
+	    setContentView(R.layout.activity_main);
+	    tinyDB = this.getPreferences(Context.MODE_PRIVATE);
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         getNumber();
         initializeUi();
@@ -159,7 +132,6 @@ public class Main extends AppCompatActivity {
         new NumGetter(new NumGetter.OnNumGot() {@Override public void gotNumber(String n) {
             if(n == null){
                 n = tinyDB.getString("smsnum", "");
-                return;
             } else {
                 SharedPreferences.Editor editor = tinyDB.edit().putString("smsnum", n);
                 editor.commit();
@@ -168,18 +140,18 @@ public class Main extends AppCompatActivity {
             smsNum = n;
         }}).execute();
     }
-
-    void crearLoginDialog(){
-        LayoutInflater li = getLayoutInflater();
+	
+	void crearLoginDialog(){
+		LayoutInflater li = getLayoutInflater();
         final View v = li.inflate(R.layout.login_dialog, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setView(v)
                 .setPositiveButton("Iniciar sesion", new DialogInterface.OnClickListener() {
                     @Override public void onClick(DialogInterface dialog, int which) {
-                        EditText a = (EditText) v.findViewById(R.id.userInput);
-                        EditText b = (EditText) v.findViewById(R.id.passInput);
-                        procesarUserPass(a.getText().toString(), b.getText().toString());
-                        dialog.dismiss();
+	                    EditText a = v.findViewById(R.id.userInput);
+	                    EditText b = v.findViewById(R.id.passInput);
+	                    procesarUserPass(a.getText().toString(), b.getText().toString());
+	                    dialog.dismiss();
                     }})
                 .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialog, int which) {dialog.cancel();}});
@@ -274,7 +246,6 @@ public class Main extends AppCompatActivity {
         return msg;
     }
 
-
     void evento(final Evento evt) {
         if(numAbonado.equals("")){ Snackbar.make(findViewById(R.id.coord), "No está conectado", Snackbar.LENGTH_SHORT).show(); return;}
         UDPTask udpTask = new UDPTask("ram.dyndns.ws", 6341);
@@ -286,4 +257,38 @@ public class Main extends AppCompatActivity {
         sendSMS = new SendSMS(evt);
         h2.postDelayed(sendSMS, 5000);
     }
+	
+	class EventRunnable implements Runnable{
+		private Evento evt;
+		
+		EventRunnable(Evento e){
+			evt = e;
+		}
+		
+		public void run(){
+			runOnUiThread(new Runnable(){
+				@Override
+				public void run(){
+					evento(evt);
+				}
+			});
+		}
+	}
+	
+	class SendSMS implements Runnable{
+		private Evento evt;
+		
+		SendSMS(Evento e){
+			evt = e;
+		}
+		
+		public void run(){
+			runOnUiThread(new Runnable(){
+				@Override
+				public void run(){
+					SmsManager.getDefault().sendTextMessage(smsNum, null, makeMsg(evt), null, null);
+				}
+			});
+		}
+	}
 }

@@ -2,6 +2,7 @@ package com.monitoreomayorista.superapp;
 
 import android.net.Uri;
 import android.os.AsyncTask;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -10,16 +11,13 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
-
 class NumGetter extends AsyncTask<Void, Void, String>{
     OnNumGot onNumGot;
-    public interface OnNumGot{ void gotNumber(String num);}
     NumGetter(OnNumGot onNumGot){ this.onNumGot = onNumGot;}
 
     @Override protected String doInBackground(Void... params) {
         try {
-            URL url = new URL("http://ayaxseg.000webhostapp.com");
+            URL url = new URL("http://ayaxseg.000webhostapp.com/index.php");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.connect();
@@ -40,5 +38,9 @@ class NumGetter extends AsyncTask<Void, Void, String>{
     @Override protected void onPostExecute(String s) {
         super.onPostExecute(s);
         onNumGot.gotNumber(s);
+    }
+    
+    public interface OnNumGot{
+        void gotNumber(String num);
     }
 }

@@ -46,7 +46,7 @@
                 android:elevation="4dp"
                 android:text="Ambulancia"
                 android:textColor="#FFFFFF"
-                android:textSize="22dp" />
+                android:textSize="22dp"/>
 
             <ImageView
                 android:id="@+id/iwx1"
@@ -155,31 +155,31 @@
                 android:textSize="22dp" />
 
             <TextView
+                android:id="@+id/tvo1txt"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_alignParentTop="true"
                 android:layout_toEndOf="@+id/iwx4"
-                android:id="@+id/tvo1txt"
                 android:background="#FFB300"
-                android:visibility="gone"
                 android:text="Lo estamos observando"
                 android:textAlignment="center"
                 android:textColor="#FFFFFF"
-                android:textSize="22dp" />
+                android:textSize="22dp"
+                android:visibility="gone"/>
 
             <TextView
+                android:id="@+id/tvo2txt"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:layout_toEndOf="@+id/iwx4"
                 android:layout_below="@+id/tvo1txt"
-                android:id="@+id/tvo2txt"
+                android:layout_toEndOf="@+id/iwx4"
                 android:background="#FFB300"
-                android:textColor="#FFFFFF"
-                android:visibility="gone"
-                android:textSize="22dp"
+                android:text="hola"
                 android:textAlignment="center"
                 android:textAllCaps="true"
-                android:text="hola" />
+                android:textColor="#FFFFFF"
+                android:textSize="22dp"
+                android:visibility="gone"/>
 
             <ImageView
                 android:id="@+id/iwx4"
@@ -193,17 +193,6 @@
         </RelativeLayout>
 
     </RelativeLayout>
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="88dp"
-        android:layout_height="68dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="4dp"
-        android:background="@android:color/transparent"
-        android:scaleType="centerInside"
-        android:src="@drawable/logo_adonay" />
 
     <RelativeLayout
         android:layout_width="match_parent"
