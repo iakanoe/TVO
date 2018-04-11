@@ -1,24 +1,28 @@
 package com.monitoreomayorista.superapp;
+
 import android.os.AsyncTask;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 
 class UDPTask extends AsyncTask<Void, Void, Boolean> {
     private String ip;
     private int port;
     private String msg;
-    public interface OnTaskCompletedListener {
-        void onTaskCompleted(boolean result);
-    }
-    private OnTaskCompletedListener onTaskCompletedListener;
+	private String ack;
+	private OnTaskCompletedListener onTaskCompletedListener;
+	
+	public UDPTask(String ip, String port){
+		this.ip = ip;
+		this.port = Integer.valueOf(port);
+	}
+	
+	public void setACK(String ack){
+		this.ack = ack;
+	}
 
     public void setOnTaskCompletedListener(OnTaskCompletedListener onTaskCompletedListener){
         this.onTaskCompletedListener = onTaskCompletedListener;
@@ -30,24 +34,31 @@ class UDPTask extends AsyncTask<Void, Void, Boolean> {
     }
 
     @Override protected Boolean doInBackground(Void... params) {
-        byte[] message = msg.getBytes();
-        int msg_length = msg.length();
-        try {
-            (new DatagramSocket()).send(new DatagramPacket(message, msg_length, InetAddress.getByName(ip), port));
-        } catch (IOException e) {
+	    try{
+		    byte[] message = msg.getBytes();
+		    DatagramSocket socket = new DatagramSocket();
+		    InetAddress ipname = InetAddress.getByName(ip);
+		    socket.connect(ipname, port);
+		    socket.send(new DatagramPacket(message, message.length));
+		    DatagramPacket reception = new DatagramPacket(new byte[29], 29);
+		    socket.receive(reception);
+		    socket.close();
+		    String data = new String(reception.getData());
+		    if(data.equals("")) return false;
+		    String[] datos = data.split(",");
+		    return datos[0].equals("$B") && datos[3].split("=")[1].equals(ack);
+	    } catch (IOException e) {
             Log.println(Log.ASSERT, "IOException", e.toString());
             return false;
         }
-        return true;
     }
 
     @Override protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
         onTaskCompletedListener.onTaskCompleted(result);
     }
-
-    public UDPTask(String ip, int port) {
-        this.ip = ip;
-        this.port = port;
-    }
+	
+	public interface OnTaskCompletedListener{
+		void onTaskCompleted(boolean result);
+	}
 }

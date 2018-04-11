@@ -174,7 +174,6 @@
                 android:layout_below="@+id/tvo1txt"
                 android:layout_toEndOf="@+id/iwx4"
                 android:background="#FFB300"
-                android:text="hola"
                 android:textAlignment="center"
                 android:textAllCaps="true"
                 android:textColor="#FFFFFF"
