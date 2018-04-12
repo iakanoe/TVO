@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -54,6 +56,7 @@ public class Main extends AppCompatActivity {
 	
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+	    if(!checkConnection()) return;
 	    ExceptionHandler.register(this, "http://ayaxseg.000webhostapp.com/exc.php");
 	    setContentView(R.layout.activity_main);
 	    tinyDB = this.getPreferences(Context.MODE_PRIVATE);
@@ -142,32 +145,45 @@ public class Main extends AppCompatActivity {
 		new DataGetter(rcAbonado, new DataGetter.OnDataGotListener(){
 			@Override
 			public void gotData(JSONObject result) throws JSONException{
-				if(result != null){
-					if(result.length() > 0){
-						rcName = result.getString("nombre");
-						portAbonado = result.getString("port");
-						smsNum = result.getString("smsnum");
-						tinyDB.edit()
-							.putString("rcname", rcName)
-							.putString("port", portAbonado)
-							.putString("smsnum", smsNum)
-							.apply();
-						return;
-					}
-				}
-				rcName = tinyDB.getString("rcname", null);
-				portAbonado = tinyDB.getString("port", null);
-				smsNum = tinyDB.getString("smsnum", null);
 				loadingDialog.dismiss();
-				if(rcName != null && portAbonado != null && smsNum != null){
-					testearDatos();
-					return;
-				}
-				
-				badRC = true;
-				crearLoginDialog();
+				justGotData(result);
 			}
 		}).execute();
+	}
+	
+	void justGotData(JSONObject result) throws JSONException{
+		if(result != null){
+			if(result.length() > 0){
+				rcName = result.getString("nombre");
+				portAbonado = result.getString("port");
+				smsNum = result.getString("smsnum");
+				tinyDB.edit()
+					.putString("rcname", rcName)
+					.putString("port", portAbonado)
+					.putString("smsnum", smsNum)
+					.apply();
+				testearDatos();
+			}
+		} else {
+			badRC = true;
+			crearLoginDialog();
+		}
+	}
+	
+	boolean checkConnection(){
+		ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+		if(networkInfo != null) return true;
+		new AlertDialog.Builder(this)
+			.setMessage("No hay conexión a Internet.")
+			.setCancelable(false)
+			.setNegativeButton("Cerrar", new DialogInterface.OnClickListener(){
+				@Override
+				public void onClick(DialogInterface dialogInterface, int i){
+					finishAndRemoveTask();
+				}
+			}).create().show();
+		return false;
 	}
 
 	void crearLoginDialog(){
@@ -179,10 +195,9 @@ public class Main extends AppCompatActivity {
 			((TextInputEditText) v.findViewById(R.id.rcInput)).setText(rcAbonado);
 			if(badRC){
 				((TextInputEditText) v.findViewById(R.id.rcInput)).setError("El RC no existe");
-				badRC = false;
 			}
 		}
-		new AlertDialog.Builder(this)
+		AlertDialog.Builder b = new AlertDialog.Builder(this)
 			.setView(v)
 			.setPositiveButton("Iniciar sesion", new DialogInterface.OnClickListener(){
 				@Override
@@ -195,13 +210,20 @@ public class Main extends AppCompatActivity {
 					procesarUserPass(a, b, c, d);
 				}
 			})
-			.setNegativeButton("Cancelar", new DialogInterface.OnClickListener(){
+			.setCancelable(false);
+		
+		if(!badRC){
+			b.setNegativeButton("Cancelar", new DialogInterface.OnClickListener(){
 				@Override
 				public void onClick(DialogInterface dialog, int which){
 					dialog.cancel();
 				}
-			})
-			.show();
+			});
+			b.setCancelable(true);
+		}
+		
+		b.show();
+		badRC = false;
 	}
 	
 	void procesarUserPass(String user, String pass, String zone, String rc){

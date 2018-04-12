@@ -27,10 +27,12 @@ class DataGetter extends AsyncTask<Void, Void, JSONObject>{
 			InputStream in = url.openStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 			String line;
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			while((line = reader.readLine()) != null) sb.append(line);
 			in.close();
-			return (new JSONArray(sb)).getJSONObject(0);
+			String r = sb.toString();
+			JSONArray arr = new JSONArray(r);
+			return arr.getJSONObject(0);
 		} catch(Exception e) {
 			e.printStackTrace();
         }
