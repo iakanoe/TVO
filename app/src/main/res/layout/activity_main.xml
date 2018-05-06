@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coord"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="8dp"
     tools:context="com.monitoreomayorista.superapp.Main">
 
     <ImageButton
@@ -13,7 +14,6 @@
         android:layout_height="50dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:layout_gravity="top|end"
         android:background="@android:color/transparent"
         android:elevation="8dp"
         android:scaleType="centerCrop"
@@ -22,6 +22,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="20dp"
         android:background="#FFFFFF"
         android:gravity="center_vertical">
 
@@ -30,8 +31,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
             android:layout_marginLeft="10dp"
+            android:layout_marginTop="8dp"
             android:clickable="true"
             android:contextClickable="false"
             android:foregroundGravity="left|center_vertical">
@@ -193,12 +194,21 @@
 
     </RelativeLayout>
 
+    <ImageView
+        android:id="@+id/imgRC"
+        android:layout_width="wrap_content"
+        android:layout_height="75dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:scaleType="centerInside"/>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:layout_alignParentBottom="true"
         android:background="#000000"
-        android:paddingLeft="10dp">
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp">
 
         <TextView
             android:id="@+id/statusTxt"
@@ -210,4 +220,4 @@
 
     </RelativeLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

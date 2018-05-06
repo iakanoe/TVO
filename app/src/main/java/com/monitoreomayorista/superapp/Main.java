@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nullwire.trace.ExceptionHandler;
@@ -26,6 +27,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -51,19 +53,25 @@ public class Main extends AppCompatActivity {
     EventRunnable runPanico = new EventRunnable(Evento.PANICO);
     EventRunnable runTVO = new EventRunnable(Evento.TVO);
 	//EventRunnable runTest = new EventRunnable(Evento.TEST);
+	HashMap<String, Integer> rc2img = new HashMap<>();
 	SendSMS sendSMS;
 	boolean badRC = false;
 	
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-	    if(!checkConnection()) return;
-	    ExceptionHandler.register(this, "http://ayaxseg.000webhostapp.com/exc.php");
-	    setContentView(R.layout.activity_main);
-	    tinyDB = this.getPreferences(Context.MODE_PRIVATE);
-        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-        initializeUi();
-        refrescar();
-    }
+	@Override protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		if(!checkConnection()) return;
+		ExceptionHandler.register(this, "http://ayaxseg.000webhostapp.com/exc.php");
+		setContentView(R.layout.activity_main);
+		tinyDB = this.getPreferences(Context.MODE_PRIVATE);
+		vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+		initializeUi();
+		refrescar();
+		createMap();
+	}
+	
+	void createMap(){
+		rc2img.put("A5", R.drawable.logo_ays);
+	}
 
     void initializeUi(){
         (findViewById(R.id.btnAmbulancia)).setOnTouchListener(new View.OnTouchListener() {
@@ -248,6 +256,7 @@ public class Main extends AppCompatActivity {
 		else {
 			getThings();
 			xxx = "Conectado con cuenta " + rcAbonado + "-" + numAbonado + "/" + userAbonado;
+			((ImageView) findViewById(R.id.imgRC)).setImageResource(rc2img.get(rcAbonado));
 		}
 		((TextView) findViewById(R.id.statusTxt)).setText(xxx);
 	}
@@ -331,7 +340,7 @@ public class Main extends AppCompatActivity {
 				String.format("%04d", Integer.valueOf(numAbonado)) +
 				"181" +
 				String.format("%03d", evt.code) +
-				"0" +
+				"00" +
 				String.format("%03d", Integer.valueOf(userAbonado)) +
 				",8,0,0," +
 				claveAbonado +
