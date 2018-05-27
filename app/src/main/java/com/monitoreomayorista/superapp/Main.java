@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,7 +54,7 @@ public class Main extends AppCompatActivity {
     EventRunnable runPanico = new EventRunnable(Evento.PANICO);
     EventRunnable runTVO = new EventRunnable(Evento.TVO);
 	//EventRunnable runTest = new EventRunnable(Evento.TEST);
-	HashMap<String, Integer> rc2img = new HashMap<>();
+	Map<String, Integer> rc2img = new HashMap<>();
 	SendSMS sendSMS;
 	boolean badRC = false;
 	
@@ -256,9 +257,16 @@ public class Main extends AppCompatActivity {
 		else {
 			getThings();
 			xxx = "Conectado con cuenta " + rcAbonado + "-" + numAbonado + "/" + userAbonado;
-			((ImageView) findViewById(R.id.imgRC)).setImageResource(rc2img.get(rcAbonado));
+			setImage();
 		}
 		((TextView) findViewById(R.id.statusTxt)).setText(xxx);
+	}
+	
+	void setImage(){
+		if(!rc2img.containsKey(rcAbonado))
+			((ImageView) findViewById(R.id.imgRC)).setImageDrawable(null);
+		else
+			((ImageView) findViewById(R.id.imgRC)).setImageResource(rc2img.get(rcAbonado));
 	}
 	
 	@SuppressLint({"SetTextI18n", "DefaultLocale"})
